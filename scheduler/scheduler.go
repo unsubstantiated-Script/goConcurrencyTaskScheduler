@@ -35,16 +35,19 @@ func NewScheduler(workers int) *Scheduler {
 // Start initializes and starts the worker goroutines to process tasks from the Scheduler's task queue concurrently.
 func (s *Scheduler) Start() {
 	for i := 0; i < s.workers; i++ {
-		go func() {
+		go func(workerID int) {
 			for {
 				select {
 				case task := <-s.tasks:
-					_ = task.ExecFunc() //Run it
+					err := task.ExecFunc() //Run it
+					if err != nil {
+						println("Worker", workerID, "failed task", task.ID, ":", err.Error())
+					}
 				case <-s.stopChan:
 					return
 				}
 			}
-		}()
+		}(i)
 	}
 }
 
