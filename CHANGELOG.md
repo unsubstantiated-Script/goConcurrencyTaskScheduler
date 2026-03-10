@@ -1,5 +1,7 @@
 Next Release
 -
+
+v1.2.0
 * ADD: Dispatch to multiple schedulers.
 * ADD: Add support for multiple schedulers.
 * ADD: Priority queue.
