@@ -1,6 +1,9 @@
 package scheduler
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 // Task represents a unit of work to be executed with specific priority and constraints.
 type Task struct {
@@ -32,19 +35,31 @@ func NewScheduler(workers int) *Scheduler {
 	return s
 }
 
-// Start initializes and starts the worker goroutines to process tasks from the Scheduler's task queue concurrently.
 func (s *Scheduler) Start() {
 	for i := 0; i < s.workers; i++ {
-		go func() {
+		go func(workerID int) {
 			for {
 				select {
 				case task := <-s.tasks:
-					_ = task.ExecFunc() //Run it
+					ctx, cancel := context.WithTimeout(context.Background(), task.Timeout)
+					defer cancel()
+					done := make(chan error, 1)
+					go func() {
+						done <- task.ExecFunc()
+					}()
+					select {
+					case err := <-done:
+						if err != nil {
+							println("Worker", workerID, "failed task", task.ID, ":", err.Error())
+						}
+					case <-ctx.Done():
+						println("Worker", workerID, "timed out task", task.ID)
+					}
 				case <-s.stopChan:
 					return
 				}
 			}
-		}()
+		}(i)
 	}
 }
 
