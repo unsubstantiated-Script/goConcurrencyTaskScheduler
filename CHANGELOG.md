@@ -1,5 +1,10 @@
 Next Release
 -
+* ADD: Dispatch to multiple schedulers.
+* ADD: Add support for multiple schedulers.
+* ADD: Priority queue.
+* ADD: Task struct.
+* ADD: Worker functionality.
 
 v1.1.0
 * ADD: Add support for multiple schedulers. 
